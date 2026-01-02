@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โม又在喝飲料 2026</title>
+    <title>我超愛喝手搖 - 2026 旗艦版</title>
     <style>
         :root {
             --primary: #87CEEB; /* 淺藍色 */
@@ -59,7 +59,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr); /* 預設兩欄 */
             gap: 12px;
         }
 
@@ -72,11 +72,6 @@
             flex-direction: column;
             justify-content: center;
             min-height: 80px;
-        }
-
-        /* 讓最愛店家/品項在手機上佔寬一點 */
-        .stat-card.wide {
-            grid-column: span 1; 
         }
 
         .stat-label {
@@ -100,13 +95,6 @@
             color: #888;
             margin-top: 4px;
         }
-
-       /* RWD: 手機版調整 */
-        @media (max-width: 600px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr); /* 維持兩欄 */
-            }
-            
 
         /* --- 按鈕與導航 --- */
         .controls-container {
@@ -265,11 +253,8 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
-
-        /* 針對甜度如果有7個選項，最後一行置中或填滿 */
-        .sugar-grid {
-             grid-template-columns: repeat(3, 1fr);
-        }
+        
+        .sugar-grid { grid-template-columns: repeat(3, 1fr); }
 
         .option-label {
             text-align: center; padding: 10px; border: 1px solid #ddd;
@@ -283,13 +268,11 @@
             box-shadow: 0 2px 5px rgba(135, 206, 235, 0.4);
         }
 
-        /* 已儲存列表 */
         .saved-item {
             background: #f8fbff; border: 1px solid #eef; padding: 12px;
             margin-bottom: 10px; border-radius: 8px; display: flex;
             justify-content: space-between; align-items: center;
         }
-        .saved-info { line-height: 1.4; }
         .saved-info strong { color: var(--primary-dark); font-size: 1.05rem; }
         .saved-price { font-weight: bold; color: var(--accent); margin-left: 10px; font-size: 1.1rem; }
         .del-btn { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
@@ -306,13 +289,14 @@
 </head>
 <body>
 
-    <h1>😼 โม่又在喝飲料</h1>
+    <h1>🥤 我超愛喝手搖</h1>
 
     <div class="dashboard">
         <div class="dashboard-header">
             <span>📊 <span id="statsYearTitle">2026</span> 年度戰績</span>
         </div>
-       <div class="stats-grid">
+        
+        <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">年度總花費</span>
                 <span class="stat-value highlight" id="statYearCost">$0</span>
@@ -343,6 +327,10 @@
                 <span class="stat-label">最愛品項</span>
                 <span class="stat-value" id="statFavItem">-</span>
                 <span class="stat-sub" id="statFavItemCount"></span>
+            </div>
+            
+            <div class="stat-card" style="display:none">
+                 <span id="statAvgPrice"></span>
             </div>
         </div>
     </div>
@@ -449,10 +437,9 @@
         }
 
         // --- 核心運算：計算所有統計數據 ---
-       // --- 核心運算：計算所有統計數據 (已更新本月杯數功能) ---
         function calculateStats(allData) {
             let monthCost = 0;
-            let monthCups = 0; // 新增：本月杯數變數
+            let monthCups = 0;
             let yearCost = 0;
             let yearCups = 0;
             let storeCounts = {};
@@ -462,31 +449,26 @@
             const yearPrefix = `${currentYear}-`;
 
             Object.keys(allData).forEach(key => {
-                // 只計算當前年份
                 if (key.startsWith(yearPrefix)) {
                     allData[key].forEach(drink => {
                         const price = parseInt(drink.price) || 0;
                         yearCost += price;
                         yearCups += 1;
 
-                        // 統計店家頻率
                         const s = drink.store || "未知";
                         storeCounts[s] = (storeCounts[s] || 0) + 1;
 
-                        // 統計品項頻率
                         const i = drink.item || "未知";
                         itemCounts[i] = (itemCounts[i] || 0) + 1;
 
-                        // 統計本月
                         if (key.startsWith(monthPrefix)) {
                             monthCost += price;
-                            monthCups += 1; // 新增：如果是本月的資料，杯數+1
+                            monthCups += 1;
                         }
                     });
                 }
             });
 
-            // 尋找出現次數最多的函數
             const getTop = (obj) => {
                 let maxKey = "-";
                 let maxVal = 0;
@@ -503,13 +485,15 @@
             const topItem = getTop(itemCounts);
             const avgPrice = yearCups > 0 ? Math.round(yearCost / yearCups) : 0;
 
-            // 更新 UI 顯示
             document.getElementById('statsYearTitle').innerText = currentYear;
             document.getElementById('statMonthCost').innerText = `$${monthCost}`;
-            document.getElementById('statMonthCups').innerText = `${monthCups} 杯`; // 新增：顯示本月杯數
+            document.getElementById('statMonthCups').innerText = `${monthCups} 杯`;
             document.getElementById('statYearCost').innerText = `$${yearCost}`;
             document.getElementById('statYearCups').innerText = `${yearCups} 杯`;
-            document.getElementById('statAvgPrice').innerText = `$${avgPrice}`;
+            
+            // 如果平均單價元素存在才更新 (以防萬一)
+            const avgEl = document.getElementById('statAvgPrice');
+            if(avgEl) avgEl.innerText = `$${avgPrice}`;
             
             document.getElementById('statFavStore').innerText = topStore.count > 0 ? topStore.key : "-";
             document.getElementById('statFavStoreCount').innerText = topStore.count > 0 ? `(喝了 ${topStore.count} 次)` : "";
@@ -523,6 +507,11 @@
             const grid = document.getElementById('calendarGrid');
             const display = document.getElementById('currentMonthDisplay');
             
+            if(!grid) {
+                console.error("日曆格子不見了！請檢查 HTML");
+                return;
+            }
+
             grid.innerHTML = "";
             display.innerText = `${currentYear} 年 ${currentMonth + 1} 月`;
 
@@ -530,17 +519,14 @@
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const allData = getData();
 
-            // 每次渲染日曆時，順便更新上方的儀表板數據
             calculateStats(allData);
 
-            // 填補空白
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.className = "day-cell empty-slot";
                 grid.appendChild(emptyCell);
             }
 
-            // 填補日期
             for (let day = 1; day <= daysInMonth; day++) {
                 const cell = document.createElement('div');
                 cell.className = "day-cell";
@@ -596,7 +582,6 @@
             const modal = document.getElementById('drinkModal');
             document.getElementById('modalDateTitle').innerText = `${dateKey} 紀錄`;
             
-            // 重置表單
             document.getElementById('storeName').value = "";
             document.getElementById('itemName').value = "";
             document.getElementById('drinkPrice').value = "";
@@ -648,7 +633,6 @@
                 });
             }
 
-            // 上限判斷
             if (todayDrinks.length >= 2) {
                 saveBtn.disabled = true;
                 saveBtn.innerText = "已達上限 (2杯)";
@@ -697,7 +681,6 @@
             }
         }
 
-        // --- 備份/還原 ---
         function exportData() {
             const data = localStorage.getItem(storageKey);
             if (!data || data === "{}") { alert("目前沒有資料可以備份喔！"); return; }
@@ -718,7 +701,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    JSON.parse(e.target.result); // 測試格式
+                    JSON.parse(e.target.result); 
                     if(confirm("確定要匯入備份嗎？目前的紀錄將會被覆蓋！")) {
                         localStorage.setItem(storageKey, e.target.result);
                         renderCalendar();
@@ -734,5 +717,3 @@
     </script>
 </body>
 </html>
-
-
