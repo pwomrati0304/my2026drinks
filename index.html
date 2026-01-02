@@ -101,15 +101,12 @@
             margin-top: 4px;
         }
 
-        /* RWD: 手機版調整 */
+       /* RWD: 手機版調整 */
         @media (max-width: 600px) {
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr); /* 維持兩欄 */
             }
-            .stat-card.wide {
-                grid-column: span 2; /* 讓長文字的欄位橫跨兩格 */
-            }
-        }
+            
 
         /* --- 按鈕與導航 --- */
         .controls-container {
@@ -728,3 +725,4 @@
     </script>
 </body>
 </html>
+
