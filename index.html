@@ -312,32 +312,37 @@
         <div class="dashboard-header">
             <span>📊 <span id="statsYearTitle">2026</span> 年度戰績</span>
         </div>
-        <div class="stats-grid">
+       <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">年度總花費</span>
                 <span class="stat-value highlight" id="statYearCost">$0</span>
             </div>
+
             <div class="stat-card">
                 <span class="stat-label">年度總杯數</span>
                 <span class="stat-value" id="statYearCups">0</span>
             </div>
+
             <div class="stat-card">
-                <span class="stat-label">平均單價</span>
-                <span class="stat-value" id="statAvgPrice">$0</span>
+                <span class="stat-label">本月花費</span>
+                <span class="stat-value" id="statMonthCost" style="color: var(--primary-dark);">$0</span>
             </div>
-            <div class="stat-card wide">
+
+            <div class="stat-card">
+                <span class="stat-label">本月杯數</span>
+                <span class="stat-value" id="statMonthCups">0</span>
+            </div>
+
+            <div class="stat-card">
                 <span class="stat-label">最愛店家</span>
                 <span class="stat-value" id="statFavStore">-</span>
                 <span class="stat-sub" id="statFavStoreCount"></span>
             </div>
-            <div class="stat-card wide">
+
+            <div class="stat-card">
                 <span class="stat-label">最愛品項</span>
                 <span class="stat-value" id="statFavItem">-</span>
                 <span class="stat-sub" id="statFavItemCount"></span>
-            </div>
-             <div class="stat-card">
-                <span class="stat-label">本月花費</span>
-                <span class="stat-value" id="statMonthCost" style="color: #666;">$0</span>
             </div>
         </div>
     </div>
@@ -444,8 +449,10 @@
         }
 
         // --- 核心運算：計算所有統計數據 ---
+       // --- 核心運算：計算所有統計數據 (已更新本月杯數功能) ---
         function calculateStats(allData) {
             let monthCost = 0;
+            let monthCups = 0; // 新增：本月杯數變數
             let yearCost = 0;
             let yearCups = 0;
             let storeCounts = {};
@@ -473,6 +480,7 @@
                         // 統計本月
                         if (key.startsWith(monthPrefix)) {
                             monthCost += price;
+                            monthCups += 1; // 新增：如果是本月的資料，杯數+1
                         }
                     });
                 }
@@ -498,6 +506,7 @@
             // 更新 UI 顯示
             document.getElementById('statsYearTitle').innerText = currentYear;
             document.getElementById('statMonthCost').innerText = `$${monthCost}`;
+            document.getElementById('statMonthCups').innerText = `${monthCups} 杯`; // 新增：顯示本月杯數
             document.getElementById('statYearCost').innerText = `$${yearCost}`;
             document.getElementById('statYearCups').innerText = `${yearCups} 杯`;
             document.getElementById('statAvgPrice').innerText = `$${avgPrice}`;
@@ -725,4 +734,5 @@
     </script>
 </body>
 </html>
+
 
